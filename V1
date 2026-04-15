@@ -1,0 +1,724 @@
+
+83efef76-d0a5-4b97-9a96-a9df70514a3e.jpg
+047a835d-92c3-448f-aaee-fa5a72ff7da4.jpg
+can you create me a binance futures position sizing calculator, i want to find the quantity i need to position, here my reference
+
+4:52 PM
+83efef76-d0a5-4b97-9a96-a9df70514a3e.jpg
+047a835d-92c3-448f-aaee-fa5a72ff7da4.jpg
+can you create me a  website forbinance futures position sizing calculator, i want to find the quantity i need to position, here my reference, also i want that it automatically resize when i use it in mobile
+
+4:52 PM
+I'll check the frontend design skill first to make this look polished.
+
+
+Reading frontend design skill
+Reading frontend design skill
+Now I'll build a sleek, trading-terminal-inspired calculator.
+
+
+Created a file, read a file
+Created a file, read a file
+Here's your Binance Futures Position Sizer — fully mobile-responsive with a dark trading terminal aesthetic. Here's what it does:
+
+Inputs (matching your reference):
+
+Account Balance (USDT)
+Trading Pair (dropdown with major Binance futures pairs)
+Risk % of account
+Leverage
+Entry Price
+Stop Loss Price
+Long / Short toggle
+Outputs after calculating:
+
+Max Order Size (quantity in coin) — the main result you need
+Notional USDT value of the position
+Risk amount in USDT
+Margin required for the trade
+SL distance & SL %
+Estimated liquidation price
+Risk exposure bar
+Formula used:
+
+Quantity = (Account × Risk%) ÷ |Entry − StopLoss|
+
+This ensures your loss never exceeds your defined risk amount if SL is hit. Just enter your values and press Calculate Position (or hit Enter).
+
+
+Futures calculator
+Code · HTML 
+
+You are out of free messages until 9:00 PM
+Upgrade
+
+
+
+Claude is AI and can make mistakes. Please double-check responses.
+Futures calculator · HTML
+Copy
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Futures Position Sizer</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0c0f;
+    --panel: #0f1217;
+    --card: #141820;
+    --border: #1e2530;
+    --border-glow: #f0b90b33;
+    --accent: #f0b90b;
+    --accent2: #00d4aa;
+    --red: #f6465d;
+    --green: #0ecb81;
+    --text: #e2e8f0;
+    --muted: #5a6478;
+    --label: #8892a4;
+    --mono: 'Share Tech Mono', monospace;
+    --sans: 'Rajdhani', sans-serif;
+  }
+ 
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+ 
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px 16px 40px;
+    background-image:
+      radial-gradient(ellipse 80% 40% at 50% -10%, #f0b90b0a 0%, transparent 70%),
+      repeating-linear-gradient(0deg, transparent, transparent 40px, #ffffff03 40px, #ffffff03 41px),
+      repeating-linear-gradient(90deg, transparent, transparent 40px, #ffffff03 40px, #ffffff03 41px);
+  }
+ 
+  /* HEADER */
+  .header {
+    width: 100%;
+    max-width: 520px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border);
+  }
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .logo-icon {
+    width: 32px; height: 32px;
+    background: var(--accent);
+    clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; font-weight: 700; color: #000;
+  }
+  .logo-text {
+    font-family: var(--sans);
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: var(--text);
+  }
+  .logo-text span { color: var(--accent); }
+  .badge {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--accent);
+    border: 1px solid var(--accent);
+    padding: 2px 8px;
+    letter-spacing: 2px;
+  }
+ 
+  /* MAIN CARD */
+  .calculator {
+    width: 100%;
+    max-width: 520px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-top: 2px solid var(--accent);
+    box-shadow: 0 0 40px #f0b90b08, 0 20px 60px #00000080;
+    overflow: hidden;
+  }
+ 
+  .section-title {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 3px;
+    color: var(--muted);
+    text-transform: uppercase;
+    padding: 14px 20px 10px;
+    background: var(--panel);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .section-title::before {
+    content: '';
+    display: inline-block;
+    width: 6px; height: 6px;
+    background: var(--accent);
+    clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+  }
+ 
+  /* FORM */
+  .form-body { padding: 20px; display: flex; flex-direction: column; gap: 14px; }
+ 
+  .field { display: flex; flex-direction: column; gap: 6px; }
+  .field-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 2px;
+    color: var(--label);
+    text-transform: uppercase;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .field-hint {
+    font-size: 9px;
+    color: var(--muted);
+    letter-spacing: 0;
+    text-transform: none;
+    font-family: var(--sans);
+  }
+ 
+  .input-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+  .input-wrap .unit {
+    position: absolute;
+    right: 12px;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--muted);
+    pointer-events: none;
+  }
+ 
+  input[type="number"], select {
+    width: 100%;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 15px;
+    padding: 11px 14px;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    appearance: none;
+    -webkit-appearance: none;
+  }
+  input[type="number"]:focus, select:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 1px var(--accent), inset 0 0 12px #f0b90b08;
+  }
+  input[type="number"]::-webkit-inner-spin-button,
+  input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; }
+  input[type="number"].has-unit { padding-right: 50px; }
+ 
+  select {
+    cursor: pointer;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%235a6478' d='M1 1l5 5 5-5'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    padding-right: 36px;
+  }
+  select option { background: var(--panel); }
+ 
+  /* SIDE TOGGLE */
+  .side-toggle {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    border: 1px solid var(--border);
+    overflow: hidden;
+  }
+  .side-btn {
+    padding: 11px;
+    text-align: center;
+    cursor: pointer;
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 2px;
+    color: var(--muted);
+    background: var(--panel);
+    border: none;
+    transition: all 0.2s;
+    user-select: none;
+  }
+  .side-btn.active-buy { background: #0ecb8120; color: var(--green); border-bottom: 2px solid var(--green); }
+  .side-btn.active-sell { background: #f6465d20; color: var(--red); border-bottom: 2px solid var(--red); }
+ 
+  /* DIVIDER */
+  .divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 4px 0;
+  }
+ 
+  /* CALCULATE BUTTON */
+  .calc-btn {
+    width: 100%;
+    padding: 14px;
+    background: var(--accent);
+    color: #000;
+    font-family: var(--sans);
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    border: none;
+    cursor: pointer;
+    transition: all 0.15s;
+    margin-top: 4px;
+    position: relative;
+    overflow: hidden;
+  }
+  .calc-btn::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, transparent 40%, #ffffff30 50%, transparent 60%);
+    transform: translateX(-100%);
+    transition: transform 0.4s;
+  }
+  .calc-btn:hover { background: #ffc93c; }
+  .calc-btn:hover::after { transform: translateX(100%); }
+  .calc-btn:active { transform: scale(0.99); }
+ 
+  /* RESULTS */
+  .results {
+    padding: 0 20px 20px;
+    display: none;
+    flex-direction: column;
+    gap: 0;
+    animation: slideIn 0.3s ease;
+  }
+  .results.show { display: flex; }
+ 
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+ 
+  .results-header {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 3px;
+    color: var(--muted);
+    text-transform: uppercase;
+    padding: 14px 0 12px;
+    border-top: 1px solid var(--border);
+    display: flex; align-items: center; gap: 8px;
+  }
+  .results-header::before {
+    content: '';
+    display: inline-block;
+    width: 6px; height: 6px;
+    background: var(--accent2);
+    border-radius: 50%;
+    box-shadow: 0 0 6px var(--accent2);
+  }
+ 
+  .result-main {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    padding: 18px 20px;
+    margin-bottom: 12px;
+    position: relative;
+    overflow: hidden;
+  }
+  .result-main::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: var(--accent2);
+  }
+  .result-main-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 2px;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  .result-main-value {
+    font-family: var(--mono);
+    font-size: 32px;
+    color: var(--accent);
+    font-weight: 400;
+    line-height: 1;
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+  }
+  .result-main-unit {
+    font-size: 14px;
+    color: var(--label);
+  }
+  .result-main-sub {
+    margin-top: 8px;
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--muted);
+  }
+  .result-main-sub span { color: var(--text); }
+ 
+  .result-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+  .result-item {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    padding: 12px 14px;
+  }
+  .result-item-label {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 2px;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .result-item-value {
+    font-family: var(--mono);
+    font-size: 16px;
+    color: var(--text);
+  }
+  .result-item-value.green { color: var(--green); }
+  .result-item-value.red { color: var(--red); }
+  .result-item-value.yellow { color: var(--accent); }
+ 
+  .risk-bar-wrap {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    padding: 14px 16px;
+    margin-bottom: 8px;
+  }
+  .risk-bar-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--label);
+    letter-spacing: 1px;
+  }
+  .risk-bar-header span.risk-pct { color: var(--accent); font-size: 12px; }
+  .risk-bar-bg {
+    height: 4px;
+    background: var(--border);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .risk-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--green), var(--accent), var(--red));
+    background-size: 300% 100%;
+    transition: width 0.6s cubic-bezier(0.34,1.56,0.64,1);
+    border-radius: 2px;
+  }
+ 
+  .summary-box {
+    background: #f6465d0a;
+    border: 1px solid #f6465d30;
+    padding: 12px 16px;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--label);
+    line-height: 1.8;
+  }
+  .summary-box.buy-box {
+    background: #0ecb810a;
+    border-color: #0ecb8130;
+  }
+  .summary-box span { color: var(--text); }
+  .summary-box .accent { color: var(--accent); }
+ 
+  /* FOOTER */
+  .footer {
+    width: 100%; max-width: 520px;
+    margin-top: 20px;
+    text-align: center;
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: 1px;
+  }
+  .footer span { color: var(--accent); }
+ 
+  /* RESPONSIVE */
+  @media (max-width: 400px) {
+    body { padding: 12px 10px 32px; }
+    .form-body { padding: 16px; gap: 12px; }
+    .results { padding: 0 16px 16px; }
+    .result-grid { grid-template-columns: 1fr 1fr; gap: 6px; }
+    .result-main-value { font-size: 26px; }
+    .logo-text { font-size: 15px; }
+  }
+</style>
+</head>
+<body>
+ 
+<header class="header">
+  <div class="logo">
+    <div class="logo-icon">⬡</div>
+    <div class="logo-text">FUTURES <span>SIZER</span></div>
+  </div>
+  <div class="badge">BINANCE</div>
+</header>
+ 
+<div class="calculator">
+  <div class="section-title">INPUT PARAMETERS</div>
+ 
+  <div class="form-body">
+ 
+    <!-- Account Size -->
+    <div class="field">
+      <div class="field-label">Account Balance <span class="field-hint">Total wallet balance</span></div>
+      <div class="input-wrap">
+        <input type="number" id="account" value="100" min="1" step="any" class="has-unit">
+        <span class="unit">USDT</span>
+      </div>
+    </div>
+ 
+    <!-- Pair -->
+    <div class="field">
+      <div class="field-label">Trading Pair</div>
+      <select id="pair">
+        <option>BTCUSDT</option>
+        <option>ETHUSDT</option>
+        <option>BNBUSDT</option>
+        <option>SOLUSDT</option>
+        <option>XRPUSDT</option>
+        <option>DOGEUSDT</option>
+        <option>ADAUSDT</option>
+        <option>AVAXUSDT</option>
+        <option>MATICUSDT</option>
+        <option>LINKUSDT</option>
+        <option>DOTUSDT</option>
+        <option>LTCUSDT</option>
+        <option>UNIUSDT</option>
+        <option>ATOMUSDT</option>
+        <option>OTHER</option>
+      </select>
+    </div>
+ 
+    <!-- Risk % -->
+    <div class="field">
+      <div class="field-label">Risk Per Trade <span class="field-hint">% of account to risk</span></div>
+      <div class="input-wrap">
+        <input type="number" id="risk" value="5" min="0.1" max="100" step="0.1" class="has-unit">
+        <span class="unit">%</span>
+      </div>
+    </div>
+ 
+    <!-- Leverage -->
+    <div class="field">
+      <div class="field-label">Leverage <span class="field-hint">Cross / Isolated</span></div>
+      <div class="input-wrap">
+        <input type="number" id="leverage" value="5" min="1" max="125" step="1" class="has-unit">
+        <span class="unit">×</span>
+      </div>
+    </div>
+ 
+    <!-- Entry -->
+    <div class="field">
+      <div class="field-label">Entry Price</div>
+      <div class="input-wrap">
+        <input type="number" id="entry" value="1.295964" min="0" step="any" class="has-unit">
+        <span class="unit">USDT</span>
+      </div>
+    </div>
+ 
+    <!-- Stoploss -->
+    <div class="field">
+      <div class="field-label">Stop Loss Price</div>
+      <div class="input-wrap">
+        <input type="number" id="stoploss" value="1.019784" min="0" step="any" class="has-unit">
+        <span class="unit">USDT</span>
+      </div>
+    </div>
+ 
+    <!-- Side -->
+    <div class="field">
+      <div class="field-label">Direction</div>
+      <div class="side-toggle">
+        <button class="side-btn active-buy" id="btn-buy" onclick="setSide('BUY')">▲ LONG</button>
+        <button class="side-btn" id="btn-sell" onclick="setSide('SELL')">▼ SHORT</button>
+      </div>
+    </div>
+ 
+    <button class="calc-btn" onclick="calculate()">CALCULATE POSITION</button>
+  </div>
+ 
+  <!-- RESULTS -->
+  <div class="results" id="results">
+    <div class="results-header">CALCULATION RESULTS</div>
+ 
+    <div class="result-main">
+      <div class="result-main-label">MAX ORDER SIZE (QUANTITY)</div>
+      <div class="result-main-value">
+        <span id="res-qty">—</span>
+        <span class="result-main-unit" id="res-base">COIN</span>
+      </div>
+      <div class="result-main-sub">≈ <span id="res-usdt-val">—</span> USDT notional value</div>
+    </div>
+ 
+    <div class="result-grid">
+      <div class="result-item">
+        <div class="result-item-label">Risk Amount</div>
+        <div class="result-item-value red" id="res-risk-usdt">—</div>
+      </div>
+      <div class="result-item">
+        <div class="result-item-label">Risk % of Acct</div>
+        <div class="result-item-value yellow" id="res-risk-pct">—</div>
+      </div>
+      <div class="result-item">
+        <div class="result-item-label">Margin Required</div>
+        <div class="result-item-value" id="res-margin">—</div>
+      </div>
+      <div class="result-item">
+        <div class="result-item-label">SL Distance</div>
+        <div class="result-item-value" id="res-sl-dist">—</div>
+      </div>
+      <div class="result-item">
+        <div class="result-item-label">SL %</div>
+        <div class="result-item-value" id="res-sl-pct">—</div>
+      </div>
+      <div class="result-item">
+        <div class="result-item-label">Liq. Estimate</div>
+        <div class="result-item-value red" id="res-liq">—</div>
+      </div>
+    </div>
+ 
+    <div class="risk-bar-wrap">
+      <div class="risk-bar-header">
+        <span>RISK EXPOSURE</span>
+        <span class="risk-pct" id="bar-label">0%</span>
+      </div>
+      <div class="risk-bar-bg">
+        <div class="risk-bar-fill" id="risk-bar" style="width:0%"></div>
+      </div>
+    </div>
+ 
+    <div class="summary-box" id="summary-box">
+      —
+    </div>
+  </div>
+</div>
+ 
+<div class="footer">FOR EDUCATIONAL USE ONLY · NOT FINANCIAL ADVICE · <span>TRADE RESPONSIBLY</span></div>
+ 
+<script>
+  let side = 'BUY';
+ 
+  function setSide(s) {
+    side = s;
+    document.getElementById('btn-buy').className = 'side-btn' + (s === 'BUY' ? ' active-buy' : '');
+    document.getElementById('btn-sell').className = 'side-btn' + (s === 'SELL' ? ' active-sell' : '');
+  }
+ 
+  function fmt(n, d = 4) {
+    if (n === null || isNaN(n)) return '—';
+    return parseFloat(n.toFixed(d)).toLocaleString('en-US', { minimumFractionDigits: d > 4 ? 2 : d });
+  }
+ 
+  function calculate() {
+    const account  = parseFloat(document.getElementById('account').value);
+    const riskPct  = parseFloat(document.getElementById('risk').value);
+    const leverage = parseFloat(document.getElementById('leverage').value);
+    const entry    = parseFloat(document.getElementById('entry').value);
+    const stoploss = parseFloat(document.getElementById('stoploss').value);
+    const pair     = document.getElementById('pair').value;
+ 
+    // Validation
+    if ([account, riskPct, leverage, entry, stoploss].some(isNaN) || entry <= 0 || stoploss <= 0) {
+      alert('Please fill in all fields with valid numbers.');
+      return;
+    }
+ 
+    // Side validation
+    if (side === 'BUY' && stoploss >= entry) {
+      alert('For a LONG position, Stop Loss must be BELOW the Entry price.');
+      return;
+    }
+    if (side === 'SELL' && stoploss <= entry) {
+      alert('For a SHORT position, Stop Loss must be ABOVE the Entry price.');
+      return;
+    }
+ 
+    // Core calculations
+    const riskUSDT   = account * (riskPct / 100);
+    const slDist     = Math.abs(entry - stoploss);
+    const slPct      = (slDist / entry) * 100;
+ 
+    // Quantity = Risk Amount / SL Distance (in coins)
+    const qty        = riskUSDT / slDist;
+    const notional   = qty * entry;
+    const margin     = notional / leverage;
+ 
+    // Estimated liquidation (simplified: margin / qty offset from entry)
+    // Liq ≈ entry - (margin / qty) * leverage  [for long]
+    const liqOffset  = entry / leverage;
+    const liqPrice   = side === 'BUY'
+      ? entry - liqOffset * 0.9
+      : entry + liqOffset * 0.9;
+ 
+    // Base asset name
+    const base = pair === 'OTHER' ? 'COIN' : pair.replace('USDT','');
+ 
+    // Display
+    document.getElementById('res-qty').textContent       = fmt(qty, 4);
+    document.getElementById('res-base').textContent      = base;
+    document.getElementById('res-usdt-val').textContent  = fmt(notional, 2);
+    document.getElementById('res-risk-usdt').textContent = fmt(riskUSDT, 2) + ' USDT';
+    document.getElementById('res-risk-pct').textContent  = fmt(riskPct, 1) + '%';
+    document.getElementById('res-margin').textContent    = fmt(margin, 4) + ' USDT';
+    document.getElementById('res-sl-dist').textContent   = fmt(slDist, 6);
+    document.getElementById('res-sl-pct').textContent    = fmt(slPct, 2) + '%';
+    document.getElementById('res-liq').textContent       = '≈ ' + fmt(liqPrice, 4);
+ 
+    // Risk bar (cap at 20%)
+    const barW = Math.min((riskPct / 20) * 100, 100);
+    document.getElementById('risk-bar').style.width = barW + '%';
+    document.getElementById('bar-label').textContent = fmt(riskPct, 1) + '%';
+ 
+    // Summary
+    const isLong = side === 'BUY';
+    const summaryEl = document.getElementById('summary-box');
+    summaryEl.className = 'summary-box ' + (isLong ? 'buy-box' : '');
+    summaryEl.innerHTML = `
+      <b style="color:${isLong ? 'var(--green)' : 'var(--red)'}; letter-spacing:2px;">${isLong ? '▲ LONG' : '▼ SHORT'} · ${pair}</b><br><br>
+      Entry: <span>${fmt(entry, 6)} USDT</span> &nbsp;|&nbsp; SL: <span>${fmt(stoploss, 6)} USDT</span><br>
+      Leverage: <span>${leverage}×</span> &nbsp;|&nbsp; Balance: <span>${fmt(account, 2)} USDT</span><br><br>
+      Order Size: <span class="accent">${fmt(qty, 4)} ${base}</span> (${fmt(notional, 2)} USDT)<br>
+      Margin Used: <span>${fmt(margin, 4)} USDT</span> &nbsp;·&nbsp; Risk: <span style="color:var(--red)">${fmt(riskUSDT, 2)} USDT (${fmt(riskPct,1)}%)</span>
+    `;
+ 
+    document.getElementById('results').className = 'results show';
+    document.getElementById('results').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+ 
+  // Allow Enter key
+  document.addEventListener('keydown', e => { if (e.key === 'Enter') calculate(); });
+</script>
+</body>
+</html>
+ 
